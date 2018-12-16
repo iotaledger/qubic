@@ -9,7 +9,7 @@ public class CommitteeTest {
   @Test
   public void testCommitteeCreate() {
     Committee c;
-    HashMap<Hash, short[]> stakes;
+    HashMap<Hash, Stake> stakes;
     stakes = new HashMap<>();
     long epoch = 500, resource = 32, stake = 483;
     c = new Committee(epoch, resource, stake, stakes);
@@ -22,7 +22,7 @@ public class CommitteeTest {
   @Test
   public void testCommitteeAttach() {
     Committee c;
-    HashMap<Hash, short[]> stakes;
+    HashMap<Hash, Stake> stakes;
     stakes = new HashMap<>();
     long epoch = 500, resource = 32, stake = 483;
     long longID = 1238796132;
@@ -36,4 +36,5 @@ public class CommitteeTest {
     c.setAttachment(id, attTime);
     Assert.assertEquals(Committee.CommitteePhase.COMMITTEE_PHASE_PROC, c.getCommitteePhase());
   }
+
 }

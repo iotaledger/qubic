@@ -1,8 +1,7 @@
 package org.iota.qbc;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.ShortBuffer;
+import java.util.*;
 
 import static java.util.Arrays.copyOfRange;
 
@@ -10,13 +9,13 @@ public class Committee {
   public static final int INT_LEN = 27;
   public static final int STAKE_LEN = 81;
   public Hash id;
-  public short[] resourceTestDurationTrits, epochDurationTrits, resourceStakeTrits;
-  public short[] startTime;
-  public Map<Hash, short[]> stakes;
+  public short[] resourceTestDurationTrits= new short[INT_LEN], epochDurationTrits= new short[INT_LEN], resourceStakeTrits = new short[STAKE_LEN];
+  public short[] startTime = new short[INT_LEN];
+  public Map<Hash, Stake> stakes;
 
   public void setAttachment(short[] h, short[] attTime) {
     id = new Hash(h);
-    startTime = Arrays.copyOfRange(attTime, 0, Math.min(INT_LEN, attTime.length));
+    System.arraycopy(attTime, 0, startTime, 0, Math.min(startTime.length, attTime.length));
   }
 
 
@@ -28,14 +27,15 @@ public class Committee {
   public Committee(short[] h, short[] v) {
     int i = 0;
     id = new Hash(h);
-    epochDurationTrits = copyOfRange(v, i, i+= INT_LEN);
-    resourceTestDurationTrits = copyOfRange(v, i, i+= INT_LEN);
-    startTime = copyOfRange(v, i, i+= INT_LEN);
-    stakes = new HashMap<Hash, short[]>();
-    while(i + Hash.SIZE_IN_SHORTS + STAKE_LEN < v.length) {
+    ShortBuffer s = ShortBuffer.allocate(v.length);
+    s.get(epochDurationTrits);
+    s.get(resourceTestDurationTrits);
+    s.get(startTime);
+    stakes = new HashMap<>();
+    while(Hash.SIZE_IN_SHORTS + STAKE_LEN <= s.remaining()) {
       stakes.put(
-          new Hash(copyOfRange(v, i, i += Hash.SIZE_IN_SHORTS)),
-          copyOfRange(v, i, i += STAKE_LEN)
+          new Hash(s),
+          new Stake(s)
       );
     }
   }
@@ -43,10 +43,7 @@ public class Committee {
   public Committee(long epochDuration
       , long resourceTestDuration
       , long resourceStake
-      , Map<Hash, short[]> stakes) {
-    epochDurationTrits = new short[INT_LEN];
-    resourceTestDurationTrits = new short[INT_LEN];
-    resourceStakeTrits = new short[STAKE_LEN];
+      , Map<Hash, Stake> stakes) {
     TritMath.longToTBytes(epochDuration, epochDurationTrits);
     TritMath.longToTBytes(resourceTestDuration, resourceTestDurationTrits);
     TritMath.longToTBytes(resourceStake, resourceStakeTrits);
@@ -83,5 +80,28 @@ public class Committee {
       }
       return CommitteePhase.COMMITTEE_PHASE_TEST;
     }
+  }
+
+  private int serializedLength() {
+    int l = 0;
+    l += epochDurationTrits.length;
+    l += resourceStakeTrits.length;
+    l += resourceTestDurationTrits.length;
+    return l;
+  }
+
+  public short[] serialize() {
+    ShortBuffer s = ShortBuffer.allocate(serializedLength());
+    s.put(epochDurationTrits);
+    s.put(resourceTestDurationTrits);
+    s.put(startTime);
+    Iterator<Map.Entry<Hash, Stake>> i = stakes.entrySet().iterator();
+    Map.Entry<Hash, Stake> e;
+    while(i.hasNext()) {
+      e = i.next();
+      s.put(e.getKey().value);
+      s.put(e.getValue().value);
+    }
+    return null;
   }
 }
