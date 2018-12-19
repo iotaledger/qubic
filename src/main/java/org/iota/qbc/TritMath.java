@@ -59,6 +59,15 @@ public class TritMath {
     return buf;
   }
 
+  public static byte tritBct(byte trit) {
+    switch(trit) {
+      case 1: return 1;
+      case 0: return 3;
+      case -1: return 2;
+      default: return 0;
+    }
+  }
+
   public static void toBct(short[] in, int inOffset, byte[] out, int offset, int length) {
     int outIndex, outOffset, inIndex, count, lastFullByteCount, rem, buf;
     byte mask;
@@ -92,5 +101,14 @@ public class TritMath {
     }
 
     out[outIndex] |= ~(0xff << ((length - lastFullByteCount) << 1)) & buf;
+  }
+
+  public static byte bctValue(int buf) {
+    switch(3 & buf) {
+      case 3: return 0;
+      case 2: return -1;
+      case 1: return 1;
+      default: return 2;
+    }
   }
 }

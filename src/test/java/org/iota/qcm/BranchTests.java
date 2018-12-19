@@ -3,14 +3,12 @@ package org.iota.qcm;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.function.Function;
-
 public class BranchTests {
   @Test
   public void testReorderInputs() {
     TritVector in, out, exp;
     BranchInstance bi;
-    Branch b;
+    Dataflow b;
     Site[] o;
     int[] ins;
     int maxDepth;
@@ -26,7 +24,7 @@ public class BranchTests {
     o[1].variant = Site.SiteVariant.SITE_VARIANT_MERGE;
     o[1].inputIndices = new int[]{0};
 
-    b = new Branch(ins, new Site[0], new Site[0], o);
+    b = new Dataflow(ins, new Site[0], new Site[0], o);
     bi = new BranchInstance(0);
 
     b.compile(bi, maxDepth);
